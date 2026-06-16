@@ -125,6 +125,8 @@
     <p>Fill out your repository configurations, then drop your tracker spreadsheet below.</p>
     <hr>
 
+<!-- Form Fields -->
+    <!-- Pwede static PAT -->
     <div class="form-group">
         <label for="token">GitHub Personal Access Token (PAT):</label>
         <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
@@ -162,12 +164,12 @@
             logDiv.scrollTop = logDiv.scrollHeight;
         }
 
-        // Feature Action: Clear the console window layout
+        // Feature Action: Clear the console 
         function clearLogs() {
             logDiv.innerHTML = `<div class="system">[System] Logs cleared. Awaiting file input...</div>`;
         }
 
-        // Handle Drag & Drop styling animations
+        // Handle Drag & Drop animations
         dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('hover'); });
         dropZone.addEventListener('dragleave', () => dropZone.classList.remove('hover'));
         
@@ -285,7 +287,7 @@
                 // Throttling latency layer to completely guarantee clearance under API secondary boundaries
                 await new Promise(resolve => setTimeout(resolve, 500));
             }
-            log("✨ Batch processing cycle completed!", "success");
+            log("Batch processing cycle completed!", "success");
         }
     </script>
 </body>
