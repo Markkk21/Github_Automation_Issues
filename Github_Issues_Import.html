@@ -5,119 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Excel to GitHub Issue Importer</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.min.js"></script>
-    <style>
-        :root {
-            --bg-color: #0d1117;
-            --card-bg: #161b22;
-            --border-color: #30363d;
-            --text-color: #c9d1d9;
-            --text-muted: #8b949e;
-            --accent-color: #58a6ff;
-            --accent-hover: #1f6feb;
-            --accent-bg: rgba(56, 139, 253, 0.1);
-            --success-color: #3fb950;
-            --error-color: #f85149;
-            --btn-bg: #21262d;
-            --btn-hover: #30363d;
-        }
-
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            max-width: 650px; 
-            margin: 40px auto; 
-            padding: 20px; 
-            line-height: 1.6; 
-            background-color: var(--bg-color);
-            color: var(--text-color);
-        }
-
-        h2 { color: #f0f6fc; margin-bottom: 5px; }
-        p { color: var(--text-muted); margin-top: 0; font-size: 14px; }
-        hr { border: 0; border-top: 1px solid var(--border-color); margin: 20px 0; }
-
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; color: #f0f6fc; }
-        
-        input[type="text"], input[type="password"] { 
-            width: 100%; 
-            padding: 10px; 
-            box-sizing: border-box; 
-            border: 1px solid var(--border-color); 
-            border-radius: 6px; 
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-size: 14px;
-            transition: border-color 0.2s;
-        }
-        input[type="text"]:focus, input[type="password"]:focus {
-            border-color: var(--accent-color);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15);
-        }
-
-        #drop-zone { 
-            border: 2px dashed var(--accent-color); 
-            border-radius: 8px; 
-            padding: 45px 20px; 
-            text-align: center; 
-            background: var(--accent-bg); 
-            color: var(--accent-color); 
-            font-weight: 600; 
-            cursor: pointer; 
-            margin-top: 25px; 
-            transition: background 0.2s, border-color 0.2s;
-        }
-        #drop-zone.hover { 
-            background: rgba(56, 139, 253, 0.2); 
-            border-color: #79c0ff; 
-        }
-
-        .log-header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 30px;
-        }
-
-        h3 { color: #f0f6fc; font-size: 16px; margin: 0; }
-        
-        .clear-btn {
-            background-color: var(--btn-bg);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 5px 12px;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s, border-color 0.2s;
-        }
-        .clear-btn:hover {
-            background-color: var(--btn-hover);
-            border-color: #8b949e;
-        }
-        .clear-btn:active {
-            background-color: #282e38;
-        }
-
-        #log { 
-            margin-top: 10px; 
-            height: 250px; 
-            overflow-y: auto; 
-            background: #010409; 
-            color: #bc8cff; 
-            padding: 15px; 
-            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace; 
-            border: 1px solid var(--border-color);
-            border-radius: 6px; 
-            font-size: 13px; 
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-        }
-        #log div { margin-bottom: 4px; border-bottom: 1px solid rgba(48, 54, 61, 0.3); padding-bottom: 4px; }
-        .success { color: var(--success-color) !important; }
-        .error { color: var(--error-color) !important; }
-        .system { color: var(--text-muted); }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
@@ -125,8 +13,6 @@
     <p>Fill out your repository configurations, then drop your tracker spreadsheet below.</p>
     <hr>
 
-<!-- Form Fields -->
-    <!-- Pwede static PAT -->
     <div class="form-group">
         <label for="token">GitHub Personal Access Token (PAT):</label>
         <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
@@ -142,153 +28,34 @@
 
     <div id="drop-zone">Drag & Drop your Excel file (.xlsx or .csv) here</div>
 
+    <div id="preview-section">
+        <div class="preview-header">
+            <h4 class="preview-title" id="preview-count">Staged Rows Data Preview</h4>
+            <button id="import-btn" class="primary-btn">Import to GitHub</button>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Body</th>
+                        <th>Labels</th>
+                        <th>Assignee</th>
+                    </tr>
+                </thead>
+                <tbody id="preview-body">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
     <div class="log-header-container">
         <h3>Process Log:</h3>
-        <button class="clear-btn" onclick="clearLogs()">Clear Logs</button>
+        <button id="clear-btn" class="clear-btn">Clear Logs</button>
     </div>
     
     <div id="log"><div class="system">[System] Engine initialization complete. Clear to upload.</div></div>
 
-    <script>
-        const dropZone = document.getElementById('drop-zone');
-        const logDiv = document.getElementById('log');
-
-        function log(message, type = '') {
-            const time = new Date().toLocaleTimeString();
-            let cssClass = '';
-            if (type === 'success') cssClass = 'class="success"';
-            if (type === 'error') cssClass = 'class="error"';
-            if (type === 'system') cssClass = 'class="system"';
-            
-            logDiv.innerHTML += `<div ${cssClass}>[${time}] ${message}</div>`;
-            logDiv.scrollTop = logDiv.scrollHeight;
-        }
-
-        // Feature Action: Clear the console 
-        function clearLogs() {
-            logDiv.innerHTML = `<div class="system">[System] Logs cleared. Awaiting file input...</div>`;
-        }
-
-        // Handle Drag & Drop animations
-        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('hover'); });
-        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('hover'));
-        
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('hover');
-            
-            const files = e.dataTransfer.files;
-            if (files.length === 0) return;
-            
-            const file = files[0];
-            log(`File detected: ${file.name}. Reading content...`, 'system');
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                let workbook;
-
-                // Format abstraction: parse native excel layout or plaintext CSV arrays
-                try {
-                    workbook = XLSX.read(data, { type: 'array' });
-                } catch (err) {
-                    const decoder = new TextDecoder('utf-8');
-                    const textData = decoder.decode(data);
-                    workbook = XLSX.read(textData, { type: 'string' });
-                }
-                
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                const issues = XLSX.utils.sheet_to_json(worksheet);
-                
-                if(issues.length === 0) {
-                    log("Error: No data found inside the uploaded spreadsheet.", "error");
-                    return;
-                }
-                
-                log(`Successfully parsed ${issues.length} rows from file. Initiating GitHub export infrastructure...`, 'system');
-                processIssues(issues);
-            };
-            reader.readAsArrayBuffer(file);
-        });
-
-        // Parse array collection structures and deploy network payloads
-        async function processIssues(issues) {
-            const token = document.getElementById('token').value.trim();
-            const owner = document.getElementById('owner').value.trim();
-            const repo = document.getElementById('repo').value.trim();
-
-            if (!token || !owner || !repo) {
-                log("Error: Please provide your GitHub Token, Repository Owner, and Repository Name.", "error");
-                return;
-            }
-
-            for (let i = 0; i < issues.length; i++) {
-                const row = issues[i];
-                
-                // Header keys parsing maps with structured variations lookup
-                const title = row["Title"] || row["title"] || row["TITLE"] || Object.values(row)[0];
-                const body = row["Body"] || row["body"] || row["BODY"] || Object.values(row)[1] || "";
-
-                const cleanTitle = title ? title.toString().trim() : "";
-                const cleanBody = body ? body.toString().trim() : "";
-
-                if (!cleanTitle) {
-                    log(`Skipped row ${i + 1}: Missing a valid 'Title' definition context string.`, "error");
-                    continue;
-                }
-
-                // Process custom elements: Labels strings translation
-                const rawLabels = row["Labels"] || row["labels"] || row["LABELS"] || "";
-                let labelsArray = [];
-                if (rawLabels) {
-                    labelsArray = rawLabels.toString().split(',').map(item => item.trim()).filter(item => item !== "");
-                }
-
-                // Process custom elements: Assignee profile formatting
-                const assigneeText = row["Assignee"] || row["assignee"] || row["ASSIGNEE"] || "";
-                let assigneesArray = [];
-                if (assigneeText) {
-                    assigneesArray = [assigneeText.toString().trim()];
-                }
-
-                log(`Syncing issue ${i + 1}/${issues.length}: "${cleanTitle}"...`);
-
-                const payload = {
-                    title: cleanTitle,
-                    body: cleanBody
-                };
-
-                if (labelsArray.length > 0) payload.labels = labelsArray;
-                if (assigneesArray.length > 0) payload.assignees = assigneesArray;
-
-                try {
-                    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Accept': 'application/vnd.github+json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        log(`Successfully created Issue #${data.number}!`, "success");
-                    } else {
-                        const errData = await response.json();
-                        log(`Failed creating issue: ${errData.message}`, "error");
-                    }
-                } catch (error) {
-                    log(`Network transmission failure: ${error.message}`, "error");
-                }
-                
-                // Throttling latency layer to completely guarantee clearance under API secondary boundaries
-                await new Promise(resolve => setTimeout(resolve, 500));
-            }
-            log("Batch processing cycle completed!", "success");
-        }
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
