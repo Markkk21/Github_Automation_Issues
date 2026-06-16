@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   # Triggers the workflow anytime you push changes to your main branch
   push:
-    branches: ["main"]
+    branches: ["master"]
 
   # Allows you to manually trigger this workflow from the Actions tab if needed
   workflow_dispatch:
